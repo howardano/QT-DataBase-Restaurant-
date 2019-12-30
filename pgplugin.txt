@@ -1,0 +1,17 @@
+export ANDROID_NDK_ROOT="/home/andrew/Android/Sdk/ndk/20.1.5948944"
+SR="$ANDROID_NDK_ROOT/platforms/android-16/arch-arm"
+BR="$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-"
+
+cd /home/andrew/postgresql-9.4.1
+
+STRIP="$BR"strip RANLIB="$BR"ranlib OBJDUMP="$BR"objdump AR="$BR"ar CC="$BR"gcc CFLAGS=--sysroot=$SR CPP="$BR"cpp CPPFLAGS=$CFLAGS
+./configure --prefix=$SR/usr --host=arm-linux-androideabi --target=arm-linux-androideabi --build="$CHOST" --without-readline --without-zlib
+
+sed -e 's/lib$(NAME)$(DLSUFFIX).$(SO_MAJOR_VERSION).$(SO_MINOR_VERSION)/lib$(NAME)$(DLSUFFIX)/g' -i src/Makefile.shlib
+sed -e 's/lib$(NAME)$(DLSUFFIX).$(SO_MAJOR_VERSION)/lib$(NAME)$(DLSUFFIX)/g' -i src/Makefile.shlib
+
+make -C src/interfaces/libpq
+
+cd /home/andrew/qtbase-opensource-src-5.4.1/src/plugins/sqldrivers/psql
+
+qmake "INCLUDEPATH+=/home/andrew/postgresql-9.4.1/src/interfaces/libpq /home/andrew/postgresql-9.4.1/src/include" "LIBS+=-L/home/andrew/postgresql-9.4.1/src/interfaces/libpq/ -lpq" "QMAKESPEC = linux-g ++ - 32 qmake"
